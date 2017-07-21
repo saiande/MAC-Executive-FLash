@@ -33,20 +33,465 @@
     <script src="js/app.js"></script>
     <script src="js/controllers.js"></script>
     <script src="js/services.js"></script>
+
+    <link rel="stylesheet" type="text/css" href="static/splunkjs/css/bootstrap.css"/>
+
+
+
+    <script src="js/splunkjs/config.js"></script>
+    <script>
+function makeTable(array, id) {
+    document.getElementById(id).innerHTML = "";
+    var table = document.createElement('table');
+    for (var i = 0; i < array.length; i++) {
+        var row = document.createElement('tr');
+        for (var j = 0; j < array[i].length; j++) {
+            var cell = document.createElement('td');
+            if(j === 0 && i!== 0)
+            {
+              var a = document.createElement('a');
+              a.setAttribute("href","#/tab/chats");
+              a.setAttribute("onclick", "searchFunction('"+array[i][j]+"')");
+              a.textContent = array[i][j];
+              cell.appendChild(a);
+            }
+            else
+            {
+              cell.textContent = array[i][j];
+            }
+            row.appendChild(cell);
+            
+              
+        }
+        table.appendChild(row);
+    }
+    document.getElementById(id).appendChild(table);
+}
+
+function makeTableDrawer(array, id) {
+    document.getElementById(id).innerHTML = "";
+    console.log("inside table drawer");
+    var table = document.createElement('table');
+    for (var i = 0; i < array.length; i++) {
+        var row = document.createElement('tr');
+        for (var j = 0; j < array[i].length; j++) {
+            var cell = document.createElement('td');
+            if(j === 0 && i!== 0)
+            {
+              var a = document.createElement('a');
+              a.setAttribute("href","#/tab/account");
+              a.setAttribute("onclick", "searchFunctionDrawer('"+array[i][j]+"')");
+              a.textContent = array[i][j];
+              cell.appendChild(a);
+            }
+            else
+            {
+              cell.textContent = array[i][j];
+            }
+            row.appendChild(cell);
+            
+              
+        }
+        table.appendChild(row);
+    }
+    document.getElementById(id).appendChild(table);
+}
+
+String.prototype.splice = function(idx, rem, str) {
+    return this.slice(0, idx) + str + this.slice(idx + Math.abs(rem));
+};
+
+splunkjs.config({
+    scheme: "https",
+    host: "us-smy-splkt01.am.elcompanies.net",
+    port: 8089,
+    app: "gis_retail_pos",
+    authenticate: {
+        username: "jfarese", 
+        password:"Password1"
+    }
+});
+
+require.config({
+    baseUrl: "/test-splunkjs.html"
+});
+
+var deps = [
+    "splunkjs/ready!",
+    "splunkjs/mvc/searchmanager",
+    "splunkjs/mvc/chartview",
+    "splunkjs/mvc/eventsviewerview"
+];
+
+function searchFunction(state)
+{
+    require(deps, function(mvc) {
+        // Load individual components
+        var SearchManager = require("splunkjs/mvc/searchmanager");
+        var ChartView = require("splunkjs/mvc/chartview");
+        var EventsViewerView = require("splunkjs/mvc/eventsviewerview");
+
+        //calcs for date
+
+        n =  new Date();
+        year = n.getFullYear();
+        month = n.getMonth() + 1;
+        day = n.getDate();
+        if(month < 10)
+            month = "0" + month;
+        if(day < 10)
+            day = "0" + day;
+        var date = year + "" + month + "" + day;
+        // console.log("date: " + date)
+
+        //searchParams earliest time calcs
+        var today = new Date();
+        var yesterday = new Date(today);
+        yesterday.setDate(today.getDate() - 1);
+        var dd = yesterday.getDate();
+        var mm = yesterday.getMonth()+1; //January is 0!
+
+        var yyyy = yesterday.getFullYear();
+        if(dd<10)
+            dd='0'+dd
+        if(mm<10)
+            mm='0'+mm
+        yesterday = yyyy + "-" + mm + "-" + dd;
+        // console.log("yesterday: "+yesterday);
+        
+        //searchParams earliest time calcs
+
+        var tomorrow = new Date(today);
+        tomorrow.setDate(today.getDate() + 1);
+        var d = tomorrow.getDate();
+        var m = tomorrow.getMonth()+1; //January is 0!
+
+        var y = tomorrow.getFullYear();
+        if(d<10)
+            d='0'+d
+        if(m<10)
+            m='0'+m
+        tomorrow = y + "-" + m + "-" + d;
+        var store = Math.random();
+        // Instantiate the views and search manager
+        var mysearch = new SearchManager({
+            earliest_time: ""+yesterday+"T22:00:00.000-04:00",
+            latest_time: ""+tomorrow+"T02:00:00.000-04:00",
+            id: store,
+            preview: true,
+            cache: true,
+            search: '| tstats sum(Retail_Transactions.NET_AMT) as Sales, dc(Retail_Transactions.TRANS_SEQ) as Transactions, sum(Retail_Transactions.Retail_Sale.SOLD_QUANTITY) as SOLD_UNITS, sum(Retail_Transactions.Retail_Sale.RETURN_QUANTITY) as RETURN_UNITS from datamodel="Transaction.Retail_Transactions" WHERE Retail_Transactions.BUSINESS_DATE_INT>='+date+' AND Retail_Transactions.BUSINESS_DATE_INT<='+date+' AND Retail_Transactions.state='+state+' AND Retail_Transactions.chain="mac" AND Retail_Transactions.TRANS_TYPCODE="RETAIL_SALE" AND Retail_Transactions.TRANS_STATCODE="COMPLETE" by Retail_Transactions.store, Retail_Transactions.name'
+            // search: '| tstats sum(Retail_Transactions.NET_AMT) as Sales, dc(Retail_Transactions.RTL_LOC_ID) as Locations from datamodel="Transaction.Retail_Transactions" WHERE Retail_Transactions.BUSINESS_DATE_INT>="20170720" AND Retail_Transactions.BUSINESS_DATE_INT<="20170720" AND Retail_Transactions.chain="mac" AND Retail_Transactions.TRANS_TYPCODE="RETAIL_SALE" AND Retail_Transactions.TRANS_STATCODE="COMPLETE" AND Retail_Transactions.timeZone="Eastern Standard Time"AND [ | gentimes start=-1 | eval Retail_Transactions.ITEM_ID="*" | makemv delim="," Retail_Transactions.ITEM_ID | fields Retail_Transactions.ITEM_ID | format ] by Retail_Transactions.state| rename Retail_Transactions.state as State| eval "Sales By Store" = round(Sales / Locations, 2) | fieldformat "Sales By Store" = "$" . tostring(\'Sales By Store\',"commas")| eval "Net Sales" = round(Sales, 2) | fieldformat "Net Sales" = "$" . tostring(\'Net Sales\',"commas")| table State, "Net Sales", Locations, "Sales By Store"| sort -"Net Sales"'
+        });
+
+        
+        //console.log(mysearch);
+
+        // var mychart = new ChartView ({
+        //     id: "chart1",
+        //     managerid: "search1",
+        //     type: "bar",
+        //     el: $("#mychart")
+        // }).render();
+        console.log(mychart);
+        var mainSearch = splunkjs.mvc.Components.get(store);
+        var myResults = mainSearch.data("preview");
+
+        myResults.on("data", function() {
+            console.log("Data (rows): ", myResults.data().rows);
+
+            // var mychart = document.getElementById("mychart");
+            // mychart.innerHTML = myResults.data().rows;
+            var string = JSON.stringify(myResults.data().rows);
+            var result = string.splice(1, 0, '["Store","Store Name","Net Sales","Transactions","Sold","Returns"],');
+            //var result = string.splice(1, 0, '["State","Net Sales","Locations","Sales by Store"],');
+            console.log(result);
+            var arr = [];
+            arr = result.split('"],["').map(function(e) {
+              return e.split('","').map(Object);
+            });
+            arr[0][0] = arr[0][0].slice(3,8);
+            arr[arr.length - 1][5] = arr[arr.length - 1][5].slice(0, -3);
+            // arr[arr.length - 1][3] = arr[arr.length - 1][3].slice(0, -3);
+            
+           
+            if(typeof(window) !== 'undefined')
+            {
+              window.addEventListener('onload', makeTableDrawer(arr, "regionTable"), false);
+              
+            }
+        });
+    });
+}
+
+function searchFunctionDrawer(storeId)
+{
+  console.log("inside search");
+    require(deps, function(mvc) {
+        // Load individual components
+        var SearchManager = require("splunkjs/mvc/searchmanager");
+        var ChartView = require("splunkjs/mvc/chartview");
+        var EventsViewerView = require("splunkjs/mvc/eventsviewerview");
+
+        //calcs for date
+
+        n =  new Date();
+        year = n.getFullYear();
+        month = n.getMonth() + 1;
+        day = n.getDate();
+        if(month < 10)
+            month = "0" + month;
+        if(day < 10)
+            day = "0" + day;
+        var date = year + "" + month + "" + day;
+        // console.log("date: " + date)
+
+        //searchParams earliest time calcs
+        var today = new Date();
+        var yesterday = new Date(today);
+        yesterday.setDate(today.getDate() - 1);
+        var dd = yesterday.getDate();
+        var mm = yesterday.getMonth()+1; //January is 0!
+
+        var yyyy = yesterday.getFullYear();
+        if(dd<10)
+            dd='0'+dd
+        if(mm<10)
+            mm='0'+mm
+        yesterday = yyyy + "-" + mm + "-" + dd;
+        // console.log("yesterday: "+yesterday);
+        
+        //searchParams earliest time calcs
+
+        var tomorrow = new Date(today);
+        tomorrow.setDate(today.getDate() + 1);
+        var d = tomorrow.getDate();
+        var m = tomorrow.getMonth()+1; //January is 0!
+
+        var y = tomorrow.getFullYear();
+        if(d<10)
+            d='0'+d
+        if(m<10)
+            m='0'+m
+        tomorrow = y + "-" + m + "-" + d;
+        
+        var drawer = Math.random();
+        // Instantiate the views and search manager
+        var mysearch = new SearchManager({
+            earliest_time: ""+yesterday+"T22:00:00.000-04:00",
+            latest_time: ""+tomorrow+"T02:00:00.000-04:00",
+            id: drawer,
+            preview: true,
+            cache: true,
+            search: '| tstats sum(Retail_Transactions.NET_AMT) as Sales from datamodel="Transaction.Retail_Transactions" WHERE Retail_Transactions.BUSINESS_DATE_INT>='+date+' AND Retail_Transactions.BUSINESS_DATE_INT<='+date+' AND Retail_Transactions.chain="mac" AND Retail_Transactions.TRANS_TYPCODE="RETAIL_SALE" AND Retail_Transactions.TRANS_STATCODE="COMPLETE" AND Retail_Transactions.RTL_LOC_ID='+storeId+' AND [ | gentimes start=-1 | eval Retail_Transactions.ITEM_ID="*" | makemv delim="," Retail_Transactions.ITEM_ID | fields Retail_Transactions.ITEM_ID | format ] by Retail_Transactions.OPERATOR_PARTY_ID | sort -Sales | rename Retail_Transactions.OPERATOR_PARTY_ID as "Drawer Operator"'
+            
+        });
+
+        
+        //console.log(mysearch);
+
+        // var mychart = new ChartView ({
+        //     id: "chart1",
+        //     managerid: "search1",
+        //     type: "bar",
+        //     el: $("#mychart")
+        // }).render();
+        console.log(mychart);
+        var mainSearch = splunkjs.mvc.Components.get(drawer);
+        var myResults = mainSearch.data("preview");
+
+        myResults.on("data", function() {
+          console.log("here");
+            console.log("Data (rows): ", myResults.data().rows);
+
+            // var mychart = document.getElementById("mychart");
+            // mychart.innerHTML = myResults.data().rows;
+            var string = JSON.stringify(myResults.data().rows);
+            var result = string.splice(1, 0, '["Drawer Operator","Sales"],');
+            //var result = string.splice(1, 0, '["State","Net Sales","Locations","Sales by Store"],');
+            console.log(result);
+            var arr = [];
+            arr = result.split('"],["').map(function(e) {
+              return e.split('","').map(Object);
+            });
+            arr[0][0] = arr[0][0].slice(3,8);
+            // arr[arr.length - 1][5] = arr[arr.length - 1][5].slice(0, -3);
+            // arr[arr.length - 1][3] = arr[arr.length - 1][3].slice(0, -3);
+            arr[arr.length - 1][1] = arr[arr.length - 1][1].slice(0, -3);
+           
+            if(typeof(window) !== 'undefined')
+            {
+              window.addEventListener('onload', makeTableDrawer(arr, "drawerTable"), false);
+            }
+        });
+    });
+}
+
+        // splunkjs.config({
+        //     scheme: "https",
+        //     host: "us-smy-splkt01.am.elcompanies.net",
+        //     port: 8089,
+        //     app: "gis_retail_pos",
+        //     authenticate: {
+        //         username: "jfarese", 
+        //         password:"Password1"
+        //     }
+        // });
+
+        // require.config({
+        //     baseUrl: "/test-splunkjs.html"
+        // });
+
+        // var deps = [
+        //     "splunkjs/ready!",
+        //     "splunkjs/mvc/searchmanager",
+        //     "splunkjs/mvc/chartview",
+        //     "splunkjs/mvc/eventsviewerview"
+        // ];
+
+        require(deps, function(mvc) {
+            // Load individual components
+            var SearchManager = require("splunkjs/mvc/searchmanager");
+            var ChartView = require("splunkjs/mvc/chartview");
+            var EventsViewerView = require("splunkjs/mvc/eventsviewerview");
+
+            //calcs for date
+
+            n =  new Date();
+            year = n.getFullYear();
+            month = n.getMonth() + 1;
+            day = n.getDate();
+            if(month < 10)
+                month = "0" + month;
+            if(day < 10)
+                day = "0" + day;
+            var date = year + "" + month + "" + day;
+            // console.log("date: " + date)
+
+            //searchParams earliest time calcs
+            var today = new Date();
+            var yesterday = new Date(today);
+            yesterday.setDate(today.getDate() - 1);
+            var dd = yesterday.getDate();
+            var mm = yesterday.getMonth()+1; //January is 0!
+
+            var yyyy = yesterday.getFullYear();
+            if(dd<10)
+                dd='0'+dd
+            if(mm<10)
+                mm='0'+mm
+            yesterday = yyyy + "-" + mm + "-" + dd;
+            // console.log("yesterday: "+yesterday);
+            
+            //searchParams earliest time calcs
+
+            var tomorrow = new Date(today);
+            tomorrow.setDate(today.getDate() + 1);
+            var d = tomorrow.getDate();
+            var m = tomorrow.getMonth()+1; //January is 0!
+
+            var y = tomorrow.getFullYear();
+            if(d<10)
+                d='0'+d
+            if(m<10)
+                m='0'+m
+            tomorrow = y + "-" + m + "-" + d;
+            var state = Math.random();
+            // Instantiate the views and search manager
+            var mysearch = new SearchManager({
+                earliest_time: ""+yesterday+"T22:00:00.000-04:00",
+                latest_time: ""+tomorrow+"T02:00:00.000-04:00",
+                id: state,
+                preview: true,
+                cache: true,
+                // search: '| tstats sum(Retail_Transactions.NET_AMT) as Sales, dc(Retail_Transactions.TRANS_SEQ) as Transactions, sum(Retail_Transactions.Retail_Sale.SOLD_QUANTITY) as SOLD_UNITS, sum(Retail_Transactions.Retail_Sale.RETURN_QUANTITY) as RETURN_UNITS from datamodel="Transaction.Retail_Transactions" WHERE Retail_Transactions.BUSINESS_DATE_INT>='+date+' AND Retail_Transactions.BUSINESS_DATE_INT<='+date+' AND Retail_Transactions.state="NY" AND Retail_Transactions.chain="mac" AND Retail_Transactions.TRANS_TYPCODE="RETAIL_SALE" AND Retail_Transactions.TRANS_STATCODE="COMPLETE" by Retail_Transactions.store, Retail_Transactions.name'
+                search: '| tstats sum(Retail_Transactions.NET_AMT) as Sales, dc(Retail_Transactions.RTL_LOC_ID) as Locations from datamodel="Transaction.Retail_Transactions" WHERE Retail_Transactions.BUSINESS_DATE_INT>='+date+' AND Retail_Transactions.BUSINESS_DATE_INT<='+date+' AND Retail_Transactions.chain="mac" AND Retail_Transactions.TRANS_TYPCODE="RETAIL_SALE" AND Retail_Transactions.TRANS_STATCODE="COMPLETE" AND Retail_Transactions.timeZone="Eastern Standard Time"AND [ | gentimes start=-1 | eval Retail_Transactions.ITEM_ID="*" | makemv delim="," Retail_Transactions.ITEM_ID | fields Retail_Transactions.ITEM_ID | format ] by Retail_Transactions.state| rename Retail_Transactions.state as State| eval "Sales By Store" = round(Sales / Locations, 2) | fieldformat "Sales By Store" = "$" . tostring(\'Sales By Store\',"commas")| eval "Net Sales" = round(Sales, 2) | fieldformat "Net Sales" = "$" . tostring(\'Net Sales\',"commas")| table State, "Net Sales", Locations, "Sales By Store"| sort -"Net Sales"'
+            });
+            //console.log(mysearch);
+
+            // var mychart = new ChartView ({
+            //     id: "chart1",
+            //     managerid: "search1",
+            //     type: "bar",
+            //     el: $("#mychart")
+            // }).render();
+            //console.log(mychart);
+            var mainSearch = splunkjs.mvc.Components.get(state);
+            var myResults = mainSearch.data("preview");
+
+            myResults.on("data", function() {
+                console.log("Data (rows): ", myResults.data().rows);
+
+                // var mychart = document.getElementById("mychart");
+                // mychart.innerHTML = myResults.data().rows;
+                var string = JSON.stringify(myResults.data().rows);
+          // var result = string.splice(1, 0, '["Store","Store Name","Net Sales","Transactions","Sold","Returns"],');
+          var result = string.splice(1, 0, '["State","Net Sales","Locations","Sales by Store"],');
+          console.log(result);
+          var arr = [];
+          arr = result.split('"],["').map(function(e) {
+            return e.split('","').map(Object);
+          })
+          arr[0][0] = arr[0][0].slice(3,8);
+          // arr[arr.length - 1][5] = arr[arr.length - 1][5].slice(0, -3);
+          arr[arr.length - 1][3] = arr[arr.length - 1][3].slice(0, -3);
+         
+          if(typeof(window) !== 'undefined')
+          {
+            window.addEventListener('onload', makeTable(arr, "mychart"), false);
+          }
+            });
+
+
+        });
+    </script>
+   /* <style>
+  table {
+    text-align: center;
+    /*font: 16px/40px */
+    font-weight: bold;
+    /*border-collapse: collapse;*/
+    /*width: 1000px;*/
+    margin: 0 auto;
+    width: 90%;
+    border: 3px solid black;
+    position:relative;
+           /*top:200%;
+           left:17%; */
+
+  }
+  td  {
+    border: 2px solid black;
+    padding: 10px;
+  }
+</style>*/
+
   </head>
   <body ng-app="starter">
     <!--
       The nav bar that will be updated as we navigate between views.
     -->
-    <ion-nav-bar class="bar-stable">
+    <ion-nav-bar class="bar-positive" ng-style="{'background-color':viewColor}">
       <ion-nav-back-button>
       </ion-nav-back-button>
+     <ion-nav-title>
+
+    <!-- <img src="mac.png" width="140px" style="display:inline-block" height="140px" position="relative" left="700px"/>
+    <ion-title class="titleicon" style="display:inline-block" ></ion-title> -->
+ <!--  <font size="5" color="white" font face="Franklin Gothic Medium">MAC Executive Flash</font> -->
+  <img class = "title-image" src='mac.png'><span> </span>
+    </ion-nav-title>
+
     </ion-nav-bar>
+
     <!--
       The views will be rendered in the <ion-nav-view> directive below
       Templates are in the /templates folder (but you could also
       have templates inline in this html file if you'd like).
     -->
-    <ion-nav-view></ion-nav-view>
+    <ion-nav-view>
+
+  </ion-nav-view>
+
   </body>
 </html>
