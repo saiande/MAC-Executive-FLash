@@ -4,5 +4,29 @@
 	padding: 15px 15px;
 }
 
+.tabs .tab-item .icon.state {
+  background-repeat: no-repeat;
+  background-position: 50%;
+  height: 60%;
+  width: 100%;
+  background-image: url("../templates/statesICon.png");
+  background-size:contain;
+}
 
+.tabs .tab-item .icon.store {
+  background-repeat: no-repeat;
+  background-position: 50%;
+  height: 60%;
+  width: 100%;
+  background-image: url("../templates/storeIcon.png");
+  background-size:contain;
+}
 
+.tabs .tab-item .icon.drawer {
+  background-repeat: no-repeat;
+  background-position: 50%;
+  height: 60%;
+  width: 100%;
+  background-image: url("../templates/drawerIcon.png");
+  background-size:contain;
+}
