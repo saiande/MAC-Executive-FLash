@@ -4,6 +4,10 @@
 	padding: 15px 15px;
 }
 
+.tabs-positive > .tabs{
+background-color: black !important;
+}
+
 .tabs .tab-item .icon.state {
   background-repeat: no-repeat;
   background-position: 50%;
@@ -29,4 +33,17 @@
   width: 100%;
   background-image: url("../templates/drawerIcon.png");
   background-size:contain;
+}
+
+#dvLoading
+{
+   background: url(../img/ajax-loader.gif) no-repeat center center;
+   height: 100px;
+   width: 100px;
+   position: fixed;
+   z-index: 1000;
+   left: 50%;
+   top: 50%;
+   margin: -25px 0 0 -25px;
+
 }
