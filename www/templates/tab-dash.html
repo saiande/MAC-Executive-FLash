@@ -1,10 +1,9 @@
 <ion-view>
   <ion-content class="padding">
 
-    <link rel="stylesheet" type="text/css" href="../static/splunkjs/css/bootstrap.css"/>
-    <script src="../static/splunkjs/config.js"></script>
+  	<ion-refresher pulling-text="Pull To Refresh" spinner="none" on-refresh="stateRefresh()"></ion-refresher>
+    
     <h1 align="center" style="font-size:150%;">State Sales</h1>
-   <!-- <div id="dvLoading"></div> -->
     <div class="content" style="{ width: 100%; }" id="stateTable"></div>
 
   </ion-content>

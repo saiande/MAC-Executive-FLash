@@ -1,23 +1,10 @@
 <ion-view>
-  <ion-content>
+  <ion-content class="padding">
 
-  <link rel="stylesheet" type="text/css" href="../static/splunkjs/css/bootstrap.css"/>
+    <ion-refresher pulling-text="Pull To Refresh" spinner="none" on-refresh="storeRefresh()"></ion-refresher>
 
-    <script src="../static/splunkjs/config.js"></script>
-  <h1 align="center" style="font-size:150%;">Store Sales</h1>
-  <!-- <div id="dvLoading"></div> -->
-  <div style="{ width: 100%; }" id="storeTable"></div>
-    <!-- <ion-list>
-      <ion-item class="item-remove-animate item-avatar item-icon-right" ng-repeat="chat in chats" type="item-text-wrap" href="#/tab/chats/{{chat.id}}">
-        <img ng-src="{{chat.face}}">
-        <h2>{{chat.name}}</h2>
-        <p>{{chat.lastText}}</p>
-        <i class="icon ion-chevron-right icon-accessory"></i>
+    <h1 align="center" style="font-size:150%;" id="storeHeader">Store Sales</h1>
+    <div class="content" style="{ width: 100%; }" id="storeTable"></div>
 
-        <ion-option-button class="button-assertive" ng-click="remove(chat)">
-          Delete
-        </ion-option-button>
-      </ion-item>
-    </ion-list> -->
   </ion-content>
 </ion-view>

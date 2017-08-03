@@ -1,7 +1,10 @@
 <ion-view>
-  <ion-content>
-  <h1 align="center" style="font-size:150%;">Drawer Sales</h1>
-	<!-- <div id="dvLoading"></div> -->
-    <div style="{ width: 100%; }" id="drawerTable"></div>
+  <ion-content class="padding">
+	
+  	<ion-refresher pulling-text="Pull To Refresh" spinner="none" on-refresh="associateRefresh()"></ion-refresher>
+
+	<h1 align="center" style="font-size:150%;" id="drawerHeader">Associate Sales</h1>
+	<div class="content" style="{ width: 100%; }" id="drawerTable"></div>
+
   </ion-content>
 </ion-view>

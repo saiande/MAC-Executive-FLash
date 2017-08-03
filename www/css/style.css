@@ -1,11 +1,10 @@
-/* Empty. Add your own CSS if you like */
 .nav-bar-block, .bar {
 	background-color: inherit !important;
 	padding: 15px 15px;
 }
 
-.tabs-positive > .tabs{
-background-color: black !important;
+.tabs-positive > .tabs {
+  background-color: black !important;
 }
 
 .tabs .tab-item .icon.state {
@@ -13,7 +12,7 @@ background-color: black !important;
   background-position: 50%;
   height: 60%;
   width: 100%;
-  background-image: url("../templates/statesICon.png");
+  background-image: url("../img/statesIcon.png");
   background-size:contain;
 }
 
@@ -22,7 +21,7 @@ background-color: black !important;
   background-position: 50%;
   height: 60%;
   width: 100%;
-  background-image: url("../templates/storeIcon.png");
+  background-image: url("../img/storeIcon.png");
   background-size:contain;
 }
 
@@ -31,23 +30,55 @@ background-color: black !important;
   background-position: 50%;
   height: 60%;
   width: 100%;
-  background-image: url("../templates/drawerIcon.png");
-  background-size:contain;
+  background-image: url("../img/drawerIcon.png");
+  background-size:23%;
 }
 
 .stateTable {
   display: none;
 }
 
-#dvLoading
-{
-   background: url(../img/ajax-loader.gif) no-repeat center center;
-   height: 100%;
-   width: 100%;
-   position: fixed;
-   z-index: 1000;
-   /*left: 50%;
-   top: 50%;*/
-   margin: 0 auto;
+table {
+  text-align: center;
+  font-size: 72%;
+  border-collapse: collapse;
+  margin: 0 auto;
+  width: 100%;
+  position: relative;
+}
 
+table td {
+  border: 1px solid gray;
+  padding: 3px;
+  vertical-align: middle;
+  line-height: 120%;
+  height: 40px;
+  position: relative;
+}
+
+table td a {
+  height: 100%;
+  width: 100%;
+  line-height: 40px;
+  position: absolute;
+  top: 0;
+  left: 0;
+}
+
+table tr:first-child, table tr:first-child td {
+  font-weight: bold;
+  font-style: italic;
+  border-top: 0;
+}
+
+table tr:last-child, table tr:last-child td {
+  border-bottom: 0;
+}
+
+table tr td:first-child, table tr th:first-child {
+  border-left: 0;
+}
+
+table tr td:last-child, table tr th:last-child {
+  border-right: 0;
 }

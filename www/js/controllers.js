@@ -1,36 +1,49 @@
 angular.module('starter.controllers', [])
 
-.controller('DashCtrl', function($scope, $rootScope) {
+.controller('LoadingCtrl', function($scope, $ionicLoading, $rootScope) {
+
   $scope.$on('$ionicView.beforeEnter', function() {
     $rootScope.viewColor = 'black';
-}); 
-})
+  }); 
 
+  $scope.show = function() {
+    $ionicLoading.show({
+      template: '<ion-spinner icon="dots" class="spinner-energized"></ion-spinner>'
+    });
+  }
 
+  $scope.hide = function() {
+    $ionicLoading.hide();
+  }
 
-.controller('ChatsCtrl', function($scope) {
-  // With the new view caching in Ionic, Controllers are only called
-  // when they are recreated or on app start, instead of every page change.
-  // To listen for when this page is active (for example, to refresh data),
-  // listen for the $ionicView.enter event:
-  //
-  //$scope.$on('$ionicView.enter', function(e) {
-  //});
+  $scope.stateRefresh = function() {
+    stateFunction();
+    $scope.$broadcast('scroll.refreshComplete');
+  };
 
-  // $scope.chats = Chats.all();
-  // $scope.remove = function(chat) {
-  //   Chats.remove(chat);
-  // };
-})
+  $scope.storeRefresh = function() {
+    storeFunction();
+    $scope.$broadcast('scroll.refreshComplete');
+  };
 
-// .controller('ChatDetailCtrl', function($scope, $stateParams, Chats) {
-//   $scope.chat = Chats.get($stateParams.chatId);
-// })
+  $scope.associateRefresh = function() {
+    drawerFunction();
+    $scope.$broadcast('scroll.refreshComplete');
+  };
 
-.controller('AccountCtrl', function($scope) {
-  // $scope.settings = {
-  //   enableFriends: true
-  // };
 });
 
 
+function loading() {
+  var scope = angular.element(document.getElementById("divLoading")).scope();
+  scope.$apply(function () {
+    scope.show();
+  });
+}
+
+function loadingComplete() {
+  var scope = angular.element(document.getElementById("divLoading")).scope();
+  scope.$apply(function () {
+    scope.hide();
+  });
+}
