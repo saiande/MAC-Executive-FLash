@@ -22,12 +22,16 @@ angular.module('starter.controllers', [])
   };
 
   $scope.storeRefresh = function() {
-    storeFunction();
+    var state = document.getElementById("storeHeader").innerHTML;
+    var state = state.slice(-2);
+    storeFunction(state);
     $scope.$broadcast('scroll.refreshComplete');
   };
 
   $scope.associateRefresh = function() {
-    drawerFunction();
+    var store = document.getElementById("drawerHeader").innerHTML;
+    var store = store.slice(-5);
+    drawerFunction(store);
     $scope.$broadcast('scroll.refreshComplete');
   };
 

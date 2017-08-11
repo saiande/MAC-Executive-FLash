@@ -38,9 +38,21 @@
   display: none;
 }
 
+#stateTable, #drawerTable {
+  font-size: 100%;
+}
+
+#storeTable {
+  font-size: 75%;
+}
+
+#storeTable tr td:nth-child(2) {
+  width: 10%;
+}
+
 table {
   text-align: center;
-  font-size: 72%;
+  /*font-size: 75%;*/
   border-collapse: collapse;
   margin: 0 auto;
   width: 100%;

@@ -30,27 +30,22 @@
  
                 document.getElementById(id).innerHTML = '';
                 
-                if(id === "storeTable")
-                {
+                if(id === "storeTable") {
                     var a = document.getElementById("storeHeader");
                     a.innerHTML = "Store Sales for " + heading;
                 }
                 
-                if(id === "drawerTable")
-                {
+                if(id === "drawerTable") {
                     var b = document.getElementById("drawerHeader");
                     b.innerHTML = "Associate Sales for " + heading;
                 }
                 
                 var table = document.createElement('table');
-                for (var i = 0; i < array.length; i++)
-                {
+                for (var i = 0; i < array.length; i++) {
                     var row = document.createElement('tr');
-                    for (var j = 0; j < array[i].length; j++)
-                    {
+                    for (var j = 0; j < array[i].length; j++) {
                         var cell = document.createElement('td');
-                        if (j === 0 && i !== 0 && func !== "nope")
-                        {
+                        if (j === 0 && i !== 0 && func !== "nope") {
                             var a = document.createElement('a');
                             a.setAttribute("href",html);
                             a.setAttribute("onclick", func+"('"+array[i][j]+"')");
@@ -64,8 +59,8 @@
                     }
                     table.appendChild(row);
                 }
-                document.getElementById(id).appendChild(table);
 
+                document.getElementById(id).appendChild(table);
                 loadingComplete();
  
             }
@@ -89,17 +84,14 @@
 
             function formatting(array, num) {
 
-                for (var i = 1; i < array.length; i++)
-                {
-                    for (var j = 0; j < array[i].length; j++)
-                    {
-                        if (j === num)
-                        {
+                for (var i = 1; i < array.length; i++) {
+                    for (var j = 0; j < array[i].length; j++) {
+                        if (j === num) {
                             array[i][j] = Number(array[i][j]);
                             array[i][j] = array[i][j].toLocaleString(undefined, {
                                 minimumFractionDigits: 2,
                                 maximumFractionDigits: 2
-                            })
+                            });
                             array[i][j] = "$" + (array[i][j]).toString();
                         }
                     }
@@ -110,12 +102,9 @@
 
             function cutting(array, state) {
 
-                for (var i = 1; i < array.length; i++)
-                {
-                    for (var j = 0; j < array[i].length; j++)
-                    {
-                        if (j == 1)
-                        {
+                for (var i = 1; i < array.length; i++) {
+                    for (var j = 0; j < array[i].length; j++) {
+                        if (j == 1) {
                             array[i][j] = array[i][j].replace("MAC", "");
                             array[i][j] = array[i][j].replace("-", "");
                             array[i][j] = array[i][j].replace("-", "");
@@ -215,8 +204,7 @@
                 $(document).ready(function() {
 
                     loading();
-                    require(deps, function(mvc) 
-                    {
+                    require(deps, function(mvc) {
                         // Load individual components
                         var SearchManager = require("splunkjs/mvc/searchmanager");
                         var ChartView = require("splunkjs/mvc/chartview");
@@ -240,14 +228,11 @@
                         var mainSearch = splunkjs.mvc.Components.get(store);
                         var myResults = mainSearch.data("preview");
 
-                        myResults.on("data", function() 
-                        {
+                        myResults.on("data", function() {
                             var string = JSON.stringify(myResults.data().rows);
-                            var result = string.splice(1, 0, '["Store","Store Name","Net Sales","Transactions","Sold","Returns"],');
-                            // var result = string.splice(1, 0, '["Store","Store Name","Net Sales","Transactions","Units"],');
+                            var result = string.splice(1, 0, '["Store","Store Name","Net Sales","Transactions","Sold Items","Returned Items"],');
                             var arr = [];
-                            arr = result.split('"],["').map(function(e) 
-                            {
+                            arr = result.split('"],["').map(function(e) {
                                 return e.split('","').map(Object);
                             });
                             arr[0][0] = arr[0][0].slice(3,8);
@@ -256,8 +241,7 @@
                             arr = formatting(arr, 2);
                             arr = cutting(arr, state);
                             
-                            if(typeof(window) !== 'undefined')
-                            {
+                            if(typeof(window) !== 'undefined') {
                                 window.addEventListener('onload', makeTable(arr, "storeTable", "#/tab/account", "drawerFunction", state), false);
                             }
                         });
@@ -272,8 +256,7 @@
                 $(document).ready(function() {
 
                     loading();
-                    require(deps, function(mvc) 
-                    {
+                    require(deps, function(mvc)  {
                         // Load individual components
                         var SearchManager = require("splunkjs/mvc/searchmanager");
                         var ChartView = require("splunkjs/mvc/chartview");
@@ -292,29 +275,24 @@
                             preview: true,
                             cache: true,
                             search: '| tstats sum(Retail_Transactions.NET_AMT) as Sales from datamodel="Transaction.Retail_Transactions" WHERE Retail_Transactions.BUSINESS_DATE_INT>='+date+' AND Retail_Transactions.BUSINESS_DATE_INT<='+date+' AND Retail_Transactions.chain="mac" AND Retail_Transactions.TRANS_TYPCODE="RETAIL_SALE" AND Retail_Transactions.TRANS_STATCODE="COMPLETE" AND Retail_Transactions.RTL_LOC_ID='+storeId+' by Retail_Transactions.OPERATOR_PARTY_ID, Retail_Transactions.OPERATOR_FIRST_NAME, Retail_Transactions.OPERATOR_LAST_NAME'
-                            
                         });
 
                         var mainSearch = splunkjs.mvc.Components.get(drawer);
                         var myResults = mainSearch.data("preview");
 
-                        myResults.on("data", function() 
-                        {
+                        myResults.on("data", function() {
                             var string = JSON.stringify(myResults.data().rows);
-                            var result = string.splice(1, 0, '["Associate", "First Name", "Last Name", "Sales"],');
+                            var result = string.splice(1, 0, '["Associate","First Name","Last Name","Sales"],');
                             var arr = [];
-                            arr = result.split('"],["').map(function(e) 
-                            {
+                            arr = result.split('"],["').map(function(e) {
                               return e.split('","').map(Object);
                             });
-                            arr[0][0] = arr[0][0].slice(3,18);
-                            arr[arr.length - 1][1] = arr[arr.length - 1][1].slice(0, -3);
-                            arr = sorting(arr, 1);
-                            arr = formatting(arr, 1);
-                            console.log(arr);
+                            arr[0][0] = arr[0][0].slice(3,12);
+                            arr[arr.length - 1][3] = arr[arr.length - 1][3].slice(0, -3);
+                            arr = sorting(arr, 3);
+                            arr = formatting(arr, 3);
 
-                            if(typeof(window) !== 'undefined')
-                            {
+                            if(typeof(window) !== 'undefined') {
                                 window.addEventListener('onload', makeTable(arr, "drawerTable", "nope", "nope", storeId), false);
                             }
                         });
@@ -329,8 +307,7 @@
                 $(document).ready(function() {
 
                     loading();
-                    require(deps, function(mvc) 
-                    {
+                    require(deps, function(mvc) {
                         // Load individual components
                         var SearchManager = require("splunkjs/mvc/searchmanager");
                         var ChartView = require("splunkjs/mvc/chartview");
@@ -354,23 +331,20 @@
                         var mainSearch = splunkjs.mvc.Components.get(state);
                         var myResults = mainSearch.data("preview");
 
-                        myResults.on("data", function() 
-                        {
+                        myResults.on("data", function() {
                             var string = JSON.stringify(myResults.data().rows);
                    
                             var result = string.splice(1, 0, '["State","Net Sales","Locations"],');
                             var arr = [];
-                            arr = result.split('"],["').map(function(e) 
-                            {
+                            arr = result.split('"],["').map(function(e) {
                                 return e.split('","').map(Object);
-                            })
+                            });
                             arr[0][0] = arr[0][0].slice(3,8);
                             arr[arr.length - 1][2] = arr[arr.length - 1][2].slice(0, -3);
                             arr = sorting(arr, 1);
                             arr = formatting(arr, 1);
                              
-                            if(typeof(window) !== 'undefined')
-                            {
+                            if(typeof(window) !== 'undefined') {
                                 window.addEventListener('onload', makeTable(arr, "stateTable", "#/tab/chats", "storeFunction", "noHead"), false);
                             }
                         });
@@ -382,6 +356,7 @@
             stateFunction();
         </script>
     </head>
+
     <body ng-app="starter">
 
         <!-- The nav bar that will be updated as we navigate between views. -->
@@ -389,7 +364,7 @@
             <ion-nav-back-button>
             </ion-nav-back-button>
             <ion-nav-title>
-                <img class="title-image" src='mac.png'><span> </span>
+                <img class="title-image" src='mac.png'><span></span>
             </ion-nav-title>
         </ion-nav-bar>
             

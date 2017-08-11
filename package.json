@@ -3,7 +3,7 @@
     "version": "0.0.1",
     "description": "An Ionic project",
     "devDependencies": {
-        "@ionic/cli-plugin-cordova": "1.6.1",
+        "@ionic/cli-plugin-cordova": "1.6.2",
         "@ionic/cli-plugin-gulp": "1.1.1",
         "@ionic/cli-plugin-ionic1": "2.1.1",
         "gulp": "^3.5.6",
